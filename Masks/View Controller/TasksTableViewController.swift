@@ -51,7 +51,18 @@ class TasksTableViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
+            let task = tasks[indexPath.row]
+            let moc = CoreDataStack.shared.mainContext
+            moc.delete(task) // Remove from MOC
             
+            do {
+                try moc.save() // Also remove it from PersistentStore and match the to MOC
+            } catch {
+                moc.reset() // If there will be an error just reset the MOC
+                NSLog("Error saving deletation;\(error)")
+            }
+            
+            tableView.deleteRows(at: [indexPath], with: .fade) // Also update tableView
         }
     }
 

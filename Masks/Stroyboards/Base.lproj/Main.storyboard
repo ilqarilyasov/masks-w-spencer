@@ -37,7 +37,7 @@
                                     </subviews>
                                 </tableViewCellContentView>
                                 <connections>
-                                    <segue destination="4Zz-7J-qqV" kind="show" identifier="ShowTaskDetail" trigger="accessoryAction" id="D3r-RO-Kg6"/>
+                                    <segue destination="4Zz-7J-qqV" kind="show" identifier="ShowTaskDetail" id="EeA-m8-oKt"/>
                                 </connections>
                             </tableViewCell>
                         </prototypes>
@@ -146,6 +146,6 @@
         </scene>
     </scenes>
     <inferredMetricsTieBreakers>
-        <segue reference="D3r-RO-Kg6"/>
+        <segue reference="EeA-m8-oKt"/>
     </inferredMetricsTieBreakers>
 </document>
