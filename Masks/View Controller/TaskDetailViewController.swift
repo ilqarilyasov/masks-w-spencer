@@ -10,11 +10,17 @@ import UIKit
 
 class TaskDetailViewController: UIViewController {
     
+    // MARK: - Properties
+    
+    var task: Mask? {
+        didSet { updateViews() }
+    }
+    
     // MARK: - Lifecycle
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        updateViews()
     }
     
 
@@ -42,7 +48,20 @@ class TaskDetailViewController: UIViewController {
             try  moc.save() // This will take the tass from MOC and save it to PersistentStore
         } catch {
             NSLog("Error saving managed object context: \(error)")
-            navigationController?.popViewController(animated: true)
         }
+        
+        navigationController?.popViewController(animated: true)
+    }
+    
+    private func updateViews() {
+        guard let task = task,
+            isViewLoaded else {
+            title = "Create Task"
+            return
+        }
+        
+        title = task.name
+        nameTextField.text = task.name
+        notesTextView.text = task.notes
     }
 }

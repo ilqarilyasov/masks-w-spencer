@@ -17,8 +17,8 @@ class CoreDataStack {
     lazy var container: NSPersistentContainer = {
         
         /// Create a container
-        //let container = NSPersistentContainer(name: "Masks") // Should be same as NSManagedObject
-        let container = NSPersistentContainer(name: kCFBundleNameKey as String)
+        let container = NSPersistentContainer(name: "Masks") // Should be same as NSManagedObject
+//        let container = NSPersistentContainer(name: kCFBundleNameKey as String)
         
         /// Load the persistent store
         container.loadPersistentStores { (_, error) in

@@ -7,35 +7,52 @@
 //
 
 import UIKit
+import CoreData
 
 class TasksTableViewController: UITableViewController {
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
+    
+    // MARK: - Properties
+    
+    var tasks: [Mask] {
+        /// What do we want to fetch from the PersistentStore
+        let fetchRequest: NSFetchRequest<Mask> = Mask.fetchRequest()
+        
+        /// We could say what kind of tasks we want to fetched
+        let moc = CoreDataStack.shared.mainContext
+        
+        do {
+            let tasks = try moc.fetch(fetchRequest)
+            return tasks
+        } catch {
+            NSLog("Error fetching tasks from PersistentStore")
+            return []
+        }
+    }
+    
+    
+    // MARK: - Lifecycle
+    
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        tableView.reloadData()
     }
 
     // MARK: - Table view data source
 
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return 0
+        return tasks.count
     }
 
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "TaskCell", for: indexPath)
-        
-
+        cell.textLabel?.text = tasks[indexPath.row].name
         return cell
     }
-
-
-    // Override to support editing the table view.
+    
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            // Delete the row from the data source
-            tableView.deleteRows(at: [indexPath], with: .fade)
-        } else if editingStyle == .insert {
-            // Create a new instance of the appropriate class, insert it into the array, and add a new row to the table view
-        }    
+            
+        }
     }
 
  
@@ -43,9 +60,9 @@ class TasksTableViewController: UITableViewController {
 
     override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
         if segue.identifier == "ShowTaskDetail" {
-            
-        } else if segue.identifier == "ShowCreateTask" {
-            
+            let destinationVC = segue.destination as! TaskDetailViewController
+            guard let indexPath = tableView.indexPathForSelectedRow else { return }
+            destinationVC.task = tasks[indexPath.row]
         }
     }
 

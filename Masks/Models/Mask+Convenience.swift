@@ -11,6 +11,7 @@ import CoreData
 
 extension Mask {
     
+    @discardableResult /// Ignore the result if it's used
     convenience init(name: String, notes: String? = nil,
                      context: NSManagedObjectContext = CoreDataStack.shared.mainContext) {
         
