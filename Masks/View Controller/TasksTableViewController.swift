@@ -35,6 +35,9 @@ class TasksTableViewController: UITableViewController, NSFetchedResultsControlle
         let prioritySortDescriptor = NSSortDescriptor(key: "priority", ascending: true)
         fetchRequest.sortDescriptors = [nameSortDescriptor, prioritySortDescriptor]
         
+//        let predicate = NSPredicate(format: "priority == %@", "critical")
+//        fetchRequest.predicate = predicate
+        
         let moc = CoreDataStack.shared.mainContext
         let frc = NSFetchedResultsController(fetchRequest: fetchRequest,
                                              managedObjectContext: moc,
@@ -139,8 +142,6 @@ class TasksTableViewController: UITableViewController, NSFetchedResultsControlle
             guard let indexPath = indexPath,
                 let newIndexPath = newIndexPath else { return }
             tableView.moveRow(at: indexPath, to: newIndexPath)
-//            tableView.deleteRows(at: [indexPath], with: .automatic)
-//            tableView.insertRows(at: [newIndexPath], with: .automatic)
         }
     }
     
