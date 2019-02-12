@@ -9,10 +9,21 @@
 import Foundation
 import CoreData
 
+enum MaskPriority: String {
+    case low
+    case normal
+    case high
+    case critical
+    
+    static var allPriorities: [MaskPriority] {
+        return [.low, .normal, .high, .critical]
+    }
+}
+
 extension Mask {
     
     @discardableResult /// Ignore the result if it's used
-    convenience init(name: String, notes: String? = nil,
+    convenience init(name: String, notes: String? = nil, priority: MaskPriority = .normal,
                      context: NSManagedObjectContext = CoreDataStack.shared.mainContext) {
         
         /// Setting up the NSManagedObject part of the Mask object
@@ -20,5 +31,6 @@ extension Mask {
         
         self.name = name
         self.notes = notes
+        self.priority = priority.rawValue
     }
 }

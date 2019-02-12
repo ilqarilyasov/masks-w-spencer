@@ -28,9 +28,14 @@ class TaskDetailViewController: UIViewController {
     
     @IBOutlet weak var nameTextField: UITextField!
     @IBOutlet weak var notesTextView: UITextView!
-    
+    @IBOutlet weak var prioritySegmentedControl: UISegmentedControl!
     
     // MARK: - Actions
+    
+    @IBAction func prioritySegmentedControlAction(_ sender: UISegmentedControl) {
+        
+    }
+    
     
     @IBAction func saveBarButtonTapped(_ sender: Any) {
         
@@ -40,7 +45,17 @@ class TaskDetailViewController: UIViewController {
         }
 
         let notes = notesTextView.text // Notes could be nil, it's optional. No need to unwrap
-        _ = Mask(name: name, notes: notes) // This create a task in ManagedObjectContext
+        let priorityIndex = prioritySegmentedControl.selectedSegmentIndex
+        let priority = MaskPriority.allPriorities[priorityIndex]
+        
+        if let task = task {
+            task.name = name
+            task.notes = notes
+            task.priority = priority.rawValue
+        } else {
+            Mask(name: name, notes: notes, priority: priority) // This create a task in ManagedObjectContext
+        }
+        
         
         /// Where to put the task?
         do {
@@ -63,5 +78,28 @@ class TaskDetailViewController: UIViewController {
         title = task.name
         nameTextField.text = task.name
         notesTextView.text = task.notes
+        
+        var index: Int = 1
+
+        switch task.priority {
+        case MaskPriority.low.rawValue:
+            index = 0
+        case MaskPriority.normal.rawValue:
+            index = 1
+        case MaskPriority.high.rawValue:
+            index = 2
+        case MaskPriority.critical.rawValue:
+            index = 3
+        default:
+            index = 1
+        }
+
+        prioritySegmentedControl.selectedSegmentIndex = index
+        
+//        guard let priorityString = task.priority,
+//            let priority = MaskPriority(rawValue: priorityString) else { return}
+//
+//        let index = MaskPriority.allPriorities.firstIndex(of: priority)
+//        prioritySegmentedControl.selectedSegmentIndex = index
     }
 }
