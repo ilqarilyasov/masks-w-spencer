@@ -14,7 +14,7 @@ class CoreDataStack {
     /// Create a shared one stack for the whole app
     static let shared = CoreDataStack()
     
-    lazy var container: NSPersistentContainer = {
+    private lazy var container: NSPersistentContainer = {
         
         /// Create a container
         let container = NSPersistentContainer(name: "Masks") // Should be same as NSManagedObject

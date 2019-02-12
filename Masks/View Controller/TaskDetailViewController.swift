@@ -69,9 +69,11 @@ class TaskDetailViewController: UIViewController {
     }
     
     private func updateViews() {
-        guard let task = task,
-            isViewLoaded else {
+        guard isViewLoaded else { return }
+        
+        guard let task = task else {
             title = "Create Task"
+            prioritySegmentedControl.selectedSegmentIndex = 1
             return
         }
         
@@ -79,27 +81,27 @@ class TaskDetailViewController: UIViewController {
         nameTextField.text = task.name
         notesTextView.text = task.notes
         
-        var index: Int = 1
-
-        switch task.priority {
-        case MaskPriority.low.rawValue:
-            index = 0
-        case MaskPriority.normal.rawValue:
-            index = 1
-        case MaskPriority.high.rawValue:
-            index = 2
-        case MaskPriority.critical.rawValue:
-            index = 3
-        default:
-            index = 1
-        }
+//        var index: Int = 1
+//
+//        switch task.priority {
+//        case MaskPriority.low.rawValue:
+//            index = 0
+//        case MaskPriority.normal.rawValue:
+//            index = 1
+//        case MaskPriority.high.rawValue:
+//            index = 2
+//        case MaskPriority.critical.rawValue:
+//            index = 3
+//        default:
+//            index = 1
+//        }
+//
+//        prioritySegmentedControl.selectedSegmentIndex = index
+        
+        guard let priorityString = task.priority,
+            let priority = MaskPriority(rawValue: priorityString),
+            let index = MaskPriority.allPriorities.firstIndex(of: priority) else { return }
 
         prioritySegmentedControl.selectedSegmentIndex = index
-        
-//        guard let priorityString = task.priority,
-//            let priority = MaskPriority(rawValue: priorityString) else { return}
-//
-//        let index = MaskPriority.allPriorities.firstIndex(of: priority)
-//        prioritySegmentedControl.selectedSegmentIndex = index
     }
 }
