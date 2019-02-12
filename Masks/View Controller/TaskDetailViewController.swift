@@ -46,7 +46,7 @@ class TaskDetailViewController: UIViewController {
 
         let notes = notesTextView.text // Notes could be nil, it's optional. No need to unwrap
         let priorityIndex = prioritySegmentedControl.selectedSegmentIndex
-        let priority = MaskPriority.allPriorities[priorityIndex]
+        let priority = MaskPriority.allCases[priorityIndex]
         
         if let task = task {
             task.name = name
@@ -100,7 +100,7 @@ class TaskDetailViewController: UIViewController {
         
         guard let priorityString = task.priority,
             let priority = MaskPriority(rawValue: priorityString),
-            let index = MaskPriority.allPriorities.firstIndex(of: priority) else { return }
+            let index = MaskPriority.allCases.firstIndex(of: priority) else { return }
 
         prioritySegmentedControl.selectedSegmentIndex = index
     }

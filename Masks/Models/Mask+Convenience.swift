@@ -9,15 +9,15 @@
 import Foundation
 import CoreData
 
-enum MaskPriority: String {
+enum MaskPriority: String, CaseIterable {
     case low
     case normal
     case high
     case critical
     
-    static var allPriorities: [MaskPriority] {
-        return [.low, .normal, .high, .critical]
-    }
+//    static var allPriorities: [MaskPriority] {
+//        return [.low, .normal, .high, .critical]
+//    }
 }
 
 extension Mask {
