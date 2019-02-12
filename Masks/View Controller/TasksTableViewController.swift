@@ -50,7 +50,6 @@ class TasksTableViewController: UITableViewController, NSFetchedResultsControlle
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-//        try! fetchedResultsController.performFetch()
         tableView.reloadData()
     }
 
@@ -86,7 +85,8 @@ class TasksTableViewController: UITableViewController, NSFetchedResultsControlle
                 NSLog("Error saving deletation;\(error)")
             }
             
-            tableView.deleteRows(at: [indexPath], with: .fade) // Also update tableView
+            // If you use NSFetchedResultsControllerDelegate function you don't need this. Because you will have two delete functions and it will crash the app
+//            tableView.deleteRows(at: [indexPath], with: .fade) // Also update tableView
         }
     }
     
@@ -138,9 +138,9 @@ class TasksTableViewController: UITableViewController, NSFetchedResultsControlle
         case .move:
             guard let indexPath = indexPath,
                 let newIndexPath = newIndexPath else { return }
-//            tableView.moveRow(at: indexPath, to: newIndexPath)
-            tableView.deleteRows(at: [indexPath], with: .automatic)
-            tableView.insertRows(at: [newIndexPath], with: .automatic)
+            tableView.moveRow(at: indexPath, to: newIndexPath)
+//            tableView.deleteRows(at: [indexPath], with: .automatic)
+//            tableView.insertRows(at: [newIndexPath], with: .automatic)
         }
     }
     
