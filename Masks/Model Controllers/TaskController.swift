@@ -23,19 +23,22 @@ class TaskController {
     // MARK: - CRUD methods
     
     @discardableResult
-    func createTask(with name: String, notes: String?, priority: MaskPriority) -> Mask {
+    func createTask(with name: String, notes: String?, priority: TaskPriority) -> Mask {
         
         let task = Mask(name: name, notes: notes, priority: priority)
+        
+        put(task)
         saveToPersistentStore()
         
         return task
     }
     
-    func updateTask(_ task: Mask, withName name: String, notes: String?, priority: MaskPriority) {
+    func updateTask(_ task: Mask, withName name: String, notes: String?, priority: TaskPriority) {
         task.name = name
         task.notes = notes
         task.priority = priority.rawValue
         
+        put(task)
         saveToPersistentStore()
     }
     
@@ -60,15 +63,15 @@ class TaskController {
             
             do {
                 let decoder = JSONDecoder()
-                let maskRepresentationJSON = try decoder.decode([String: MaskRepresentation].self, from: data)
-//                _ = maskRepresentationJSON.map{ Mask(maskRep: $0.value) }
+                let taskRepresentationJSON = try decoder.decode([String: TaskRepresentation].self, from: data)
+//                _ = taskRepresentationJSON.map{ Mask(maskRep: $0.value) }
                 
-                for (_, value) in maskRepresentationJSON {
-                    if let mask = self.mask(for: value.identifier),
-                        let priority = MaskPriority(rawValue: value.priority) {
-                        self.updateTask(mask, withName: value.name, notes: value.notes, priority: priority)
+                for (_, value) in taskRepresentationJSON {
+                    if let task = self.task(for: value.identifier),
+                        let priority = TaskPriority(rawValue: value.priority) {
+                        self.updateTask(task, withName: value.name, notes: value.notes, priority: priority)
                     } else {
-                        Mask(maskRep: value)
+                        Mask(taskRep: value)
                     }
                 }
                 
@@ -81,10 +84,47 @@ class TaskController {
         }.resume()
     }
     
+    func put(_ task: Mask, completion: @escaping (Error?) -> Void = { _ in }) {
+        // Create a URLRequest
+        let identifier = task.identifier ?? UUID()
+        let urlPlusID = baseURL.appendingPathComponent(identifier.uuidString)
+        let urlPlusJSON = urlPlusID.appendingPathExtension("json")
+        var request = URLRequest(url: urlPlusJSON)
+        request.httpMethod = "PUT"
+        
+        // Mask -> TaskRepresentation -> JSNO Data
+        guard let taskRepresentation = task.taskPepresentation else {
+            NSLog("Unable to convert task to task representation")
+            completion(NSError())
+            return
+        }
+        
+        do {
+            let encoder = JSONEncoder()
+            let taskJSON = try encoder.encode(taskRepresentation)
+            request.httpBody = taskJSON
+        } catch {
+            NSLog("Unable to encode task representation: \(error)")
+            completion(error)
+            return
+        }
+        
+        // Create a URLSession.shared.dataTask
+        URLSession.shared.dataTask(with: request) { (data, _, error) in
+            if let error = error {
+                NSLog("Error putting tas to server: \(error)")
+                completion(error)
+                return
+            }
+            
+            completion(nil)
+        }.resume()
+    }
+    
     
     // See if a task with identifier exists already in CoreData
     
-    func mask(for uuid: String) -> Mask? {
+    func task(for uuid: String) -> Mask? {
         let fetchRequest: NSFetchRequest<Mask> = Mask.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "identifier == %@", uuid)
         

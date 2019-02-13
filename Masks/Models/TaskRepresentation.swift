@@ -1,5 +1,5 @@
 //
-//  MaskRepresentation.swift
+//  TaskRepresentation.swift
 //  Masks
 //
 //  Created by Ilgar Ilyasov on 2/13/19.
@@ -8,7 +8,7 @@
 
 import Foundation
 
-struct MaskRepresentation: Codable, Equatable {
+struct TaskRepresentation: Codable, Equatable {
     var name: String
     var notes: String?
     var priority: String

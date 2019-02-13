@@ -111,6 +111,9 @@ class TasksTableViewController: UITableViewController, NSFetchedResultsControlle
 //            destinationVC.task = tasks[indexPath.row]
             destinationVC.task = fetchedResultsController.object(at: indexPath)
             destinationVC.taskController = taskController
+        } else if segue.identifier == "ShowCreateTask" {
+            let destinationVC = segue.destination as! TaskDetailViewController
+            destinationVC.taskController = taskController
         }
     }
     
