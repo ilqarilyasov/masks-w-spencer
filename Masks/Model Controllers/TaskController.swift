@@ -61,11 +61,16 @@ class TaskController {
             do {
                 let decoder = JSONDecoder()
                 let maskRepresentationJSON = try decoder.decode([String: MaskRepresentation].self, from: data)
-                _ = maskRepresentationJSON.map{ Mask(maskRep: $0.value) }
+//                _ = maskRepresentationJSON.map{ Mask(maskRep: $0.value) }
                 
-//                for (_, value) in maskRepresentationJSON {
-//                    Mask(maskRep: value)
-//                }
+                for (_, value) in maskRepresentationJSON {
+                    if let mask = self.mask(for: value.identifier),
+                        let priority = MaskPriority(rawValue: value.priority) {
+                        self.updateTask(mask, withName: value.name, notes: value.notes, priority: priority)
+                    } else {
+                        Mask(maskRep: value)
+                    }
+                }
                 
                 self.saveToPersistentStore()
                 completion(nil)
@@ -74,8 +79,24 @@ class TaskController {
                 completion(error)
             }
         }.resume()
-        
     }
+    
+    
+    // See if a task with identifier exists already in CoreData
+    
+    func mask(for uuid: String) -> Mask? {
+        let fetchRequest: NSFetchRequest<Mask> = Mask.fetchRequest()
+        fetchRequest.predicate = NSPredicate(format: "identifier == %@", uuid)
+        
+        do {
+            let moc = CoreDataStack.shared.mainContext
+            return try moc.fetch(fetchRequest).first
+        } catch {
+            NSLog("Error fetching task with \(uuid): \(error)")
+            return nil
+        }
+    }
+    
     
     // MARK: - Persistent Coordinator methods
     
