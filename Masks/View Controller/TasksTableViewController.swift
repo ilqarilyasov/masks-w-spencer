@@ -29,11 +29,13 @@ class TasksTableViewController: UITableViewController, NSFetchedResultsControlle
 //        }
 //    }
     
+    let taskController = TaskController()
+    
     lazy var fetchedResultsController: NSFetchedResultsController<Mask> = {
         let fetchRequest: NSFetchRequest<Mask> = Mask.fetchRequest()
-        let nameSortDescriptor = NSSortDescriptor(key: "name", ascending: true)
         let prioritySortDescriptor = NSSortDescriptor(key: "priority", ascending: true)
-        fetchRequest.sortDescriptors = [nameSortDescriptor, prioritySortDescriptor]
+        let nameSortDescriptor = NSSortDescriptor(key: "name", ascending: true)
+        fetchRequest.sortDescriptors = [prioritySortDescriptor, nameSortDescriptor]
         
 //        let predicate = NSPredicate(format: "priority == %@", "critical")
 //        fetchRequest.predicate = predicate
@@ -108,7 +110,7 @@ class TasksTableViewController: UITableViewController, NSFetchedResultsControlle
             guard let indexPath = tableView.indexPathForSelectedRow else { return }
 //            destinationVC.task = tasks[indexPath.row]
             destinationVC.task = fetchedResultsController.object(at: indexPath)
-            
+            destinationVC.taskController = taskController
         }
     }
     

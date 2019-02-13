@@ -12,6 +12,7 @@ class TaskDetailViewController: UIViewController {
     
     // MARK: - Properties
     
+    var taskController: TaskController?
     var task: Mask? {
         didSet { updateViews() }
     }
@@ -49,20 +50,9 @@ class TaskDetailViewController: UIViewController {
         let priority = MaskPriority.allCases[priorityIndex]
         
         if let task = task {
-            task.name = name
-            task.notes = notes
-            task.priority = priority.rawValue
+            taskController?.updateTask(task, withName: name, notes: notes, priority: priority)
         } else {
-            Mask(name: name, notes: notes, priority: priority) // This create a task in ManagedObjectContext
-        }
-        
-        
-        /// Where to put the task?
-        do {
-            let moc = CoreDataStack.shared.mainContext
-            try  moc.save() // This will take the tass from MOC and save it to PersistentStore
-        } catch {
-            NSLog("Error saving managed object context: \(error)")
+            taskController?.createTask(with: name, notes: notes, priority: priority) // This create a task in ManagedObjectContext
         }
         
         navigationController?.popViewController(animated: true)
