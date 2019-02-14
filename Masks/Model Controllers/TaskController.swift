@@ -94,7 +94,7 @@ class TaskController {
                 
                 completion(nil)
             } catch {
-                NSLog("Error deccodind MaskRespresentation: \(error)")
+                NSLog("Error deccoding MaskRespresentation: \(error)")
                 completion(error)
             }
         }.resume()
@@ -137,6 +137,29 @@ class TaskController {
         }.resume()
     }
     
+    
+    func deleteTaskFromServer(_ task: Mask, completion: @escaping (Error?) -> Void = { _ in }) {
+        guard let identifier = task.identifier else {
+            NSLog("Error unwrapping task identifier")
+            completion(NSError())
+            return
+        }
+        
+        let url = baseURL.appendingPathComponent(identifier.uuidString)
+        let url2 = url.appendingPathExtension("json")
+        
+        var request = URLRequest(url: url2)
+        request.httpMethod = "DELETE"
+        
+        URLSession.shared.dataTask(with: request) { (_, _, error) in
+            if let error = error {
+                NSLog("Error deleting task: \(task)")
+                completion(error)
+                return
+            }
+            completion(nil)
+        }.resume()
+    }
     
     // See if a task with identifier exists already in CoreData
     

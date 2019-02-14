@@ -50,6 +50,16 @@ class TasksTableViewController: UITableViewController, NSFetchedResultsControlle
         return frc
     }()
     
+    @IBAction func refresh(_ sender: Any) {
+        taskController.fetchTasksFromServer { (error) in
+            if let error = error {
+                NSLog("Error fethching tasks from server: \(error)")
+            }
+            DispatchQueue.main.async {
+                self.refreshControl?.endRefreshing()
+            }
+        }
+    }
     
     // MARK: - Lifecycle
     
@@ -82,6 +92,7 @@ class TasksTableViewController: UITableViewController, NSFetchedResultsControlle
             let task = fetchedResultsController.object(at: indexPath)
             let moc = CoreDataStack.shared.mainContext
             moc.delete(task) // Remove from MOC
+            taskController.deleteTaskFromServer(task)
             
             do {
                 try moc.save() // Also remove it from PersistentStore and match the to MOC
