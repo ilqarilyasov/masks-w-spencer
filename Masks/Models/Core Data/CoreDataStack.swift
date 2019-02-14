@@ -15,7 +15,7 @@ class CoreDataStack {
     private init() { }
     static let shared = CoreDataStack()
     
-    private lazy var container: NSPersistentContainer = {
+    lazy var container: NSPersistentContainer = {
         
         /// Create a container
         let container = NSPersistentContainer(name: "Masks") // Should be same as NSManagedObject
@@ -27,13 +27,28 @@ class CoreDataStack {
                 fatalError("Failed to load persistent store: \(error)")
             }
         }
-        
+        container.viewContext.automaticallyMergesChangesFromParent = true
         return container
     }()
     
     /// This should help you remember that the viewContext should be used on the main thread
     var mainContext: NSManagedObjectContext {
         return container.viewContext
+    }
+    
+    func save(context: NSManagedObjectContext = CoreDataStack.shared.mainContext) throws {
+        var error: Error?
+        
+        context.performAndWait {
+            do {
+                try context.save()
+            } catch let saveError {
+                context.reset()
+                error = saveError
+            }
+        }
+        
+        if let error = error { throw error }
     }
     
 }

@@ -18,6 +18,7 @@ class TaskController {
     // MARK: - Properties
     
     let baseURL = URL(string: "https://tasks-3f211.firebaseio.com/")!
+    let moc = CoreDataStack.shared.mainContext
     
     
     // MARK: - CRUD methods
@@ -27,9 +28,13 @@ class TaskController {
         
         let task = Mask(name: name, notes: notes, priority: priority)
         
-        put(task)
-        saveToPersistentStore()
+        do {
+            try CoreDataStack.shared.save()
+        } catch {
+            NSLog("Error saving newly created task to the main moc: \(error)")
+        }
         
+        put(task)
         return task
     }
     
@@ -39,7 +44,6 @@ class TaskController {
         task.priority = priority.rawValue
         
         put(task)
-        saveToPersistentStore()
     }
     
     func fetchTasksFromServer(completion: @escaping (Error?) -> Void = { _ in } ) {
@@ -64,18 +68,30 @@ class TaskController {
             do {
                 let decoder = JSONDecoder()
                 let taskRepresentationJSON = try decoder.decode([String: TaskRepresentation].self, from: data)
-//                _ = taskRepresentationJSON.map{ Mask(maskRep: $0.value) }
                 
-                for (_, value) in taskRepresentationJSON {
-                    if let task = self.task(for: value.identifier),
-                        let priority = TaskPriority(rawValue: value.priority) {
-                        self.updateTask(task, withName: value.name, notes: value.notes, priority: priority)
-                    } else {
-                        Mask(taskRep: value)
+                // Convert TaskRepresentation to Tasks
+                // it should happen on a background context
+                
+                let backgroundMoc = CoreDataStack.shared.container.newBackgroundContext()
+                
+                backgroundMoc.performAndWait {
+                    for (_, value) in taskRepresentationJSON {
+                        if let task = self.task(for: value.identifier, context: backgroundMoc),
+                            let priority = TaskPriority(rawValue: value.priority) {
+                            self.updateTask(task, withName: value.name, notes: value.notes, priority: priority)
+                        } else {
+                            // Initialize the task in the background NOT on the main context
+                            Mask(taskRep: value, context: backgroundMoc)
+                        }
+                    }
+                    
+                    do {
+                        try CoreDataStack.shared.save(context: backgroundMoc)
+                    } catch {
+                        NSLog("Error saving background context: \(error)")
                     }
                 }
                 
-                self.saveToPersistentStore()
                 completion(nil)
             } catch {
                 NSLog("Error deccodind MaskRespresentation: \(error)")
@@ -124,31 +140,31 @@ class TaskController {
     
     // See if a task with identifier exists already in CoreData
     
-    func task(for uuid: String) -> Mask? {
+    func task(for uuid: String, context: NSManagedObjectContext) -> Mask? {
         let fetchRequest: NSFetchRequest<Mask> = Mask.fetchRequest()
         fetchRequest.predicate = NSPredicate(format: "identifier == %@", uuid)
+        var task: Mask?
         
-        do {
-            let moc = CoreDataStack.shared.mainContext
-            return try moc.fetch(fetchRequest).first
-        } catch {
-            NSLog("Error fetching task with \(uuid): \(error)")
-            return nil
+        context.performAndWait {
+            do {
+                task = try context.fetch(fetchRequest).first
+            } catch {
+                NSLog("Error fetching task with \(uuid): \(error)")
+            }
         }
+        return task
     }
     
     
     // MARK: - Persistent Coordinator methods
     
-    func saveToPersistentStore() {
-        let moc = CoreDataStack.shared.mainContext
-        
-        do {
-            try moc.save()
-        } catch {
-            moc.reset()
-            NSLog("Error saving managed object context: \(error)")
-        }
-    }
+//    func saveToPersistentStore() {
+//        do {
+//            try moc.save()
+//        } catch {
+//            moc.reset()
+//            NSLog("Error saving managed object context: \(error)")
+//        }
+//    }
     
 }
